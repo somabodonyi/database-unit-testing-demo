@@ -45,7 +45,10 @@ namespace DatabaseUnitTests
             Microsoft.Data.Tools.Schema.Sql.UnitTesting.Conditions.ScalarValueCondition Row2Column2IsStevenVanDeursensName;
             Microsoft.Data.Tools.Schema.Sql.UnitTesting.SqlDatabaseTestAction ValidTagId_ReturnsAuthors_PretestAction;
             Microsoft.Data.Tools.Schema.Sql.UnitTesting.SqlDatabaseTestAction ValidTagId_ReturnsAuthors_PosttestAction;
+            Microsoft.Data.Tools.Schema.Sql.UnitTesting.SqlDatabaseTestAction Failingtest_TestAction;
+            Microsoft.Data.Tools.Schema.Sql.UnitTesting.Conditions.RowCountCondition rowCountCondition1;
             this.ValidTagId_ReturnsAuthorsData = new Microsoft.Data.Tools.Schema.Sql.UnitTesting.SqlDatabaseTestActions();
+            this.FailingtestData = new Microsoft.Data.Tools.Schema.Sql.UnitTesting.SqlDatabaseTestActions();
             ValidTagId_ReturnsAuthors_TestAction = new Microsoft.Data.Tools.Schema.Sql.UnitTesting.SqlDatabaseTestAction();
             Row1Column1IsMarkSeemannsId = new Microsoft.Data.Tools.Schema.Sql.UnitTesting.Conditions.ScalarValueCondition();
             Row1Column2IsMarkSeemannsName = new Microsoft.Data.Tools.Schema.Sql.UnitTesting.Conditions.ScalarValueCondition();
@@ -53,6 +56,8 @@ namespace DatabaseUnitTests
             Row2Column2IsStevenVanDeursensName = new Microsoft.Data.Tools.Schema.Sql.UnitTesting.Conditions.ScalarValueCondition();
             ValidTagId_ReturnsAuthors_PretestAction = new Microsoft.Data.Tools.Schema.Sql.UnitTesting.SqlDatabaseTestAction();
             ValidTagId_ReturnsAuthors_PosttestAction = new Microsoft.Data.Tools.Schema.Sql.UnitTesting.SqlDatabaseTestAction();
+            Failingtest_TestAction = new Microsoft.Data.Tools.Schema.Sql.UnitTesting.SqlDatabaseTestAction();
+            rowCountCondition1 = new Microsoft.Data.Tools.Schema.Sql.UnitTesting.Conditions.RowCountCondition();
             // 
             // ValidTagId_ReturnsAuthors_TestAction
             // 
@@ -102,12 +107,6 @@ namespace DatabaseUnitTests
             Row2Column2IsStevenVanDeursensName.ResultSet = 1;
             Row2Column2IsStevenVanDeursensName.RowNumber = 2;
             // 
-            // ValidTagId_ReturnsAuthorsData
-            // 
-            this.ValidTagId_ReturnsAuthorsData.PosttestAction = ValidTagId_ReturnsAuthors_PosttestAction;
-            this.ValidTagId_ReturnsAuthorsData.PretestAction = ValidTagId_ReturnsAuthors_PretestAction;
-            this.ValidTagId_ReturnsAuthorsData.TestAction = ValidTagId_ReturnsAuthors_TestAction;
-            // 
             // ValidTagId_ReturnsAuthors_PretestAction
             // 
             resources.ApplyResources(ValidTagId_ReturnsAuthors_PretestAction, "ValidTagId_ReturnsAuthors_PretestAction");
@@ -115,6 +114,30 @@ namespace DatabaseUnitTests
             // ValidTagId_ReturnsAuthors_PosttestAction
             // 
             resources.ApplyResources(ValidTagId_ReturnsAuthors_PosttestAction, "ValidTagId_ReturnsAuthors_PosttestAction");
+            // 
+            // ValidTagId_ReturnsAuthorsData
+            // 
+            this.ValidTagId_ReturnsAuthorsData.PosttestAction = ValidTagId_ReturnsAuthors_PosttestAction;
+            this.ValidTagId_ReturnsAuthorsData.PretestAction = ValidTagId_ReturnsAuthors_PretestAction;
+            this.ValidTagId_ReturnsAuthorsData.TestAction = ValidTagId_ReturnsAuthors_TestAction;
+            // 
+            // FailingtestData
+            // 
+            this.FailingtestData.PosttestAction = null;
+            this.FailingtestData.PretestAction = null;
+            this.FailingtestData.TestAction = Failingtest_TestAction;
+            // 
+            // Failingtest_TestAction
+            // 
+            Failingtest_TestAction.Conditions.Add(rowCountCondition1);
+            resources.ApplyResources(Failingtest_TestAction, "Failingtest_TestAction");
+            // 
+            // rowCountCondition1
+            // 
+            rowCountCondition1.Enabled = true;
+            rowCountCondition1.Name = "rowCountCondition1";
+            rowCountCondition1.ResultSet = 1;
+            rowCountCondition1.RowCount = 10;
         }
 
         #endregion
@@ -157,6 +180,31 @@ namespace DatabaseUnitTests
                 SqlExecutionResult[] posttestResults = TestService.Execute(this.PrivilegedContext, this.PrivilegedContext, testActions.PosttestAction);
             }
         }
+        [TestMethod()]
+        public void Failingtest()
+        {
+            SqlDatabaseTestActions testActions = this.FailingtestData;
+            // Execute the pre-test script
+            // 
+            System.Diagnostics.Trace.WriteLineIf((testActions.PretestAction != null), "Executing pre-test script...");
+            SqlExecutionResult[] pretestResults = TestService.Execute(this.PrivilegedContext, this.PrivilegedContext, testActions.PretestAction);
+            try
+            {
+                // Execute the test script
+                // 
+                System.Diagnostics.Trace.WriteLineIf((testActions.TestAction != null), "Executing test script...");
+                SqlExecutionResult[] testResults = TestService.Execute(this.ExecutionContext, this.PrivilegedContext, testActions.TestAction);
+            }
+            finally
+            {
+                // Execute the post-test script
+                // 
+                System.Diagnostics.Trace.WriteLineIf((testActions.PosttestAction != null), "Executing post-test script...");
+                SqlExecutionResult[] posttestResults = TestService.Execute(this.PrivilegedContext, this.PrivilegedContext, testActions.PosttestAction);
+            }
+        }
+
         private SqlDatabaseTestActions ValidTagId_ReturnsAuthorsData;
+        private SqlDatabaseTestActions FailingtestData;
     }
 }
